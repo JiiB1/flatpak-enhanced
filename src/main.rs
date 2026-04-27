@@ -1,6 +1,5 @@
-use clap::{Parser, Subcommand};
-use flatpak_enhanced::alias::AliasCommands;
-use std::process::Command;
+use clap::Parser;
+use flatpak_enhanced::{commands::BaseCommands, exec::Exec};
 
 #[derive(Parser)]
 #[command(
@@ -11,35 +10,13 @@ use std::process::Command;
 )]
 struct Cli {
     #[command(subcommand)]
-    command: Commands,
-}
-
-#[derive(Subcommand)]
-enum Commands {
-    #[command(external_subcommand)]
-    External(Vec<String>),
-
-    #[command(about = "A set of command to manage applications and packages aliases")]
-    Alias {
-        #[command(subcommand)]
-        action: AliasCommands,
-    },
+    command: BaseCommands,
 }
 
 fn main() {
-    let cli = Cli::parse();
-
-    match cli.command {
-        Commands::External(args) => {
-            let status = Command::new("flatpak")
-                .args(&args)
-                .status()
-                .expect("Failed to execute flatpak");
-
-            std::process::exit(status.code().unwrap_or(1));
-        }
-        Commands::Alias { action } => match action {
-            _ => {}
-        },
+    let res = Cli::parse().command.exec();
+    if let Err(err) = res {
+        eprintln!("error: {}", err.message);
+        std::process::exit(err.status_code);
     }
 }
