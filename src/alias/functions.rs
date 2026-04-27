@@ -16,7 +16,7 @@ fn list_for_target(config_path: &PathBuf, target: &str) -> Result<Vec<String>, C
     )
     .map(|file_content| {
         file_content
-            .split('\n')
+            .split_terminator('\n')
             .map(|line| line.trim().to_string())
             .collect()
     })
