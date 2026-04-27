@@ -3,7 +3,7 @@ use clap::Subcommand;
 use crate::{
     alias::functions::list,
     config::config_folder_path,
-    exec::{CommandError, Exec},
+    model::{CmdError, Exec},
 };
 
 #[derive(Subcommand)]
@@ -30,7 +30,7 @@ pub enum AliasCommands {
 }
 
 impl Exec for AliasCommands {
-    fn exec(&self) -> Result<(), CommandError> {
+    fn exec(&self) -> Result<(), CmdError> {
         let config_path = config_folder_path()?;
         match self {
             AliasCommands::Create { target, aliases } => {
@@ -40,16 +40,14 @@ impl Exec for AliasCommands {
                 // TODO
             }
             AliasCommands::List { target } => {
-                list(&config_path, target).and_then(|all_aliases| {
-                    all_aliases.iter().for_each(|aliases| {
-                        println!("{}", aliases.target);
-                        aliases
-                            .aliases
-                            .iter()
-                            .for_each(|alias| println!("\t{}", alias));
-                    });
-                    Ok(())
-                })?;
+                let all_aliases = list(&config_path, target)?;
+                all_aliases.iter().for_each(|aliases| {
+                    println!("{}", aliases.target);
+                    aliases
+                        .aliases
+                        .iter()
+                        .for_each(|alias| println!("\t{}", alias));
+                });
             }
         };
         Ok(())

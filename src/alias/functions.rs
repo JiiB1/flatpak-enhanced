@@ -1,13 +1,14 @@
 use std::{fs::read_to_string, path::PathBuf};
 
-use crate::{alias::model::Aliases, config::read_or_create_dir, exec::CommandError};
+use crate::{
+    alias::model::Aliases,
+    config::read_or_create_dir,
+    model::{CmdError, CmdResult},
+};
 
 const ALIASES_FILE_EXTENSION: &str = "fpe-aliases";
 
-pub fn target_from_alias(
-    config_path: &PathBuf,
-    alias: &str,
-) -> Result<Option<String>, CommandError> {
+pub fn target_from_alias(config_path: &PathBuf, alias: &str) -> CmdResult<Option<String>> {
     let aliases = list(config_path, &None)?;
     let matching_aliases: Vec<&Aliases> = aliases
         .iter()
@@ -16,8 +17,8 @@ pub fn target_from_alias(
     match matching_aliases.len() {
         0 => Ok(None),
         1 => Ok(Some(matching_aliases[0].target.clone())),
-        _ => Err(CommandError {
-            status_code: 11,
+        _ => Err(CmdError {
+            code: 11,
             message: format!(
                 "Duplicate alias : '{}' is used as an alias for all the following : {}",
                 alias,
@@ -32,7 +33,7 @@ pub fn target_from_alias(
     }
 }
 
-fn list_for_target(config_path: &PathBuf, target: &str) -> Result<Vec<String>, CommandError> {
+fn list_for_target(config_path: &PathBuf, target: &str) -> CmdResult<Vec<String>> {
     read_to_string(
         config_path
             .join("alias")
@@ -44,13 +45,13 @@ fn list_for_target(config_path: &PathBuf, target: &str) -> Result<Vec<String>, C
             .map(|line| line.trim().to_string())
             .collect()
     })
-    .map_err(|_| CommandError {
-        status_code: 10,
+    .map_err(|_| CmdError {
+        code: 10,
         message: format!("No aliases for '{}'", target).leak(),
     })
 }
 
-pub fn list(config_path: &PathBuf, target: &Option<String>) -> Result<Vec<Aliases>, CommandError> {
+pub fn list(config_path: &PathBuf, target: &Option<String>) -> CmdResult<Vec<Aliases>> {
     let mut res = Vec::new();
     match target {
         Some(target) => {

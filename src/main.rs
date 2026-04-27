@@ -1,5 +1,5 @@
 use clap::Parser;
-use flatpak_enhanced::{commands::BaseCommands, exec::Exec};
+use flatpak_enhanced::{commands::BaseCommands, model::Exec};
 
 #[derive(Parser)]
 #[command(
@@ -17,6 +17,6 @@ fn main() {
     let res = Cli::parse().command.exec();
     if let Err(err) = res {
         eprintln!("error: {}", err.message);
-        std::process::exit(err.status_code);
+        std::process::exit(err.code);
     }
 }

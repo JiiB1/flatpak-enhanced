@@ -3,7 +3,7 @@ use std::process::Command;
 use crate::alias::alias::AliasCommands;
 use clap::Subcommand;
 
-use crate::exec::{CommandError, Exec};
+use crate::model::{CmdError, Exec};
 
 #[derive(Subcommand)]
 pub enum BaseCommands {
@@ -18,7 +18,7 @@ pub enum BaseCommands {
 }
 
 impl Exec for BaseCommands {
-    fn exec(&self) -> Result<(), CommandError> {
+    fn exec(&self) -> Result<(), CmdError> {
         match self {
             BaseCommands::External(args) => {
                 let status = Command::new("flatpak")
@@ -28,8 +28,8 @@ impl Exec for BaseCommands {
 
                 let code = status.code().unwrap_or(1);
                 if code != 0 {
-                    return Err(CommandError {
-                        status_code: code,
+                    return Err(CmdError {
+                        code,
                         message: "Could not execute flatpak : ensure flatpak binaries are accessible via your PATH",
                     });
                 }
