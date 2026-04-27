@@ -4,6 +4,34 @@ use crate::{alias::model::Aliases, config::read_or_create_dir, exec::CommandErro
 
 const ALIASES_FILE_EXTENSION: &str = "fpe-aliases";
 
+pub fn target_from_alias(
+    config_path: &PathBuf,
+    alias: &str,
+) -> Result<Option<String>, CommandError> {
+    let aliases = list(config_path, &None)?;
+    let matching_aliases: Vec<&Aliases> = aliases
+        .iter()
+        .filter(|Aliases { target: _, aliases }| aliases.iter().any(|a| a == alias))
+        .collect();
+    match matching_aliases.len() {
+        0 => Ok(None),
+        1 => Ok(Some(matching_aliases[0].target.clone())),
+        _ => Err(CommandError {
+            status_code: 11,
+            message: format!(
+                "Duplicate alias : '{}' is used as an alias for all the following : {}",
+                alias,
+                aliases
+                    .iter()
+                    .map(|a| a.target.clone())
+                    .collect::<Vec<String>>()
+                    .join(",")
+            )
+            .leak(),
+        }),
+    }
+}
+
 fn list_for_target(config_path: &PathBuf, target: &str) -> Result<Vec<String>, CommandError> {
     read_to_string(
         config_path
@@ -26,7 +54,8 @@ pub fn list(config_path: &PathBuf, target: &Option<String>) -> Result<Vec<Aliase
     let mut res = Vec::new();
     match target {
         Some(target) => {
-            let aliases = list_for_target(config_path, target)?;
+            let target = target_from_alias(config_path, target)?.unwrap_or(target.clone());
+            let aliases = list_for_target(config_path, &target)?;
             res.push(Aliases {
                 target: target.to_string(),
                 aliases,
