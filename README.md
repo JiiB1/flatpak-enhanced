@@ -1,4 +1,4 @@
-# flatpak-enhanced
+# flatpak-enhanced [![CodeQL](https://github.com/JiiB1/flatpak-enhanced/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/JiiB1/flatpak-enhanced/actions/workflows/github-code-scanning/codeql) [![Tests](https://github.com/JiiB1/flatpak-enhanced/actions/workflows/rust.yml/badge.svg)](https://github.com/JiiB1/flatpak-enhanced/actions/workflows/rust.yml)
 
 A lightweight wrapper for the flatpak tool, made with Rust.
 
