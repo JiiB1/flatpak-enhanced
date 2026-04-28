@@ -1,7 +1,7 @@
 use dialoguer::Confirm;
 use regex::Regex;
 use std::{
-    collections::HashSet,
+    collections::{HashMap, HashSet},
     fs::read_to_string,
     io::Write,
     path::PathBuf,
@@ -9,7 +9,7 @@ use std::{
 };
 
 use crate::{
-    alias::model::Aliases,
+    alias::model::{Aliases, AliasesCollection, AliasesCollectionExt},
     config::{get_and_create_file, path_exists, read_and_create_dir, remove_file},
     model::{CmdError, CmdResult, ResultExt},
 };
@@ -74,31 +74,23 @@ fn is_target_installed(target: &str) -> CmdResult<bool> {
 }
 
 fn target_from_alias(config_path: &PathBuf, alias: &str) -> CmdResult<Option<String>> {
-    let aliases = list(config_path, &None)?;
-    let matching_aliases: Vec<&Aliases> = aliases
-        .iter()
-        .filter(|Aliases { target: _, aliases }| aliases.iter().any(|a| a == alias))
-        .collect();
+    let matching_aliases = list(config_path, &None)?.targets_from_alias(alias)?;
     match matching_aliases.len() {
         0 => Ok(None),
-        1 => Ok(Some(matching_aliases[0].target.clone())),
+        1 => Ok(Some(matching_aliases[0].clone())),
         _ => Err(CmdError::new(
             11,
             format!(
                 "Duplicate alias : '{}' is used as an alias for all the following : {}",
                 alias,
-                aliases
-                    .iter()
-                    .map(|a| a.target.clone())
-                    .collect::<Vec<String>>()
-                    .join(",")
+                matching_aliases.join(",")
             )
             .leak(),
         )),
     }
 }
 
-fn list_for_target(config_path: &PathBuf, target: &str) -> CmdResult<Vec<String>> {
+fn list_for_target(config_path: &PathBuf, target: &str) -> CmdResult<HashSet<String>> {
     read_to_string(
         config_path
             .join("alias")
@@ -106,13 +98,13 @@ fn list_for_target(config_path: &PathBuf, target: &str) -> CmdResult<Vec<String>
     )
     .with_cmd_err(10, format!("No aliases for '{}'", target).leak())
     .and_then(|file_content| {
-        let Aliases { target: _, aliases } = validate_aliases(Aliases::new(
-            target.to_string(),
-            file_content
+        let Aliases { target: _, aliases } = validate_aliases(Aliases {
+            target: target.to_string(),
+            aliases: file_content
                 .split_whitespace()
                 .map(|line| line.trim().to_string())
                 .collect(),
-        ))?;
+        })?;
         Ok(aliases)
     })
 }
@@ -120,7 +112,7 @@ fn list_for_target(config_path: &PathBuf, target: &str) -> CmdResult<Vec<String>
 pub fn create(
     config_path: &PathBuf,
     target: &str,
-    aliases: Vec<String>,
+    aliases: HashSet<String>,
     force: bool,
 ) -> CmdResult<()> {
     if aliases.is_empty() {
@@ -155,7 +147,13 @@ pub fn create(
     }
     if !aliases.is_empty() {
         get_and_create_file(&filepath, true)?
-            .write_all(format!(" {}", aliases.join(" ")).as_bytes())
+            .write_all(
+                format!(
+                    " {}",
+                    aliases.into_iter().collect::<Vec<String>>().join(" ")
+                )
+                .as_bytes(),
+            )
             .with_cmd_err(
                 19,
                 format!("Unable to write into file '{}'", filepath.to_string_lossy()).leak(),
@@ -165,18 +163,17 @@ pub fn create(
 }
 
 pub fn remove(config_path: &PathBuf, to_remove: Vec<String>) -> CmdResult<()> {
-    let to_keep =
-        list(config_path, &None)?
-            .into_iter()
-            .filter_map(|Aliases { target, aliases }| {
-                let len = aliases.len();
-                let res: Vec<String> = aliases
+    let to_keep: AliasesCollection = list(config_path, &None)?
+        .into_iter()
+        .filter(|(_, aliases)| {
+            aliases.len()
+                != aliases
                     .into_iter()
                     .filter(|a| !to_remove.contains(a))
-                    .collect();
-                (res.len() != len).then_some(Aliases::new(target, res))
-            });
-    for Aliases { target, aliases } in to_keep {
+                    .count()
+        })
+        .collect();
+    for (target, aliases) in to_keep {
         let filepath = config_path
             .join("alias")
             .join(format!("{}.{}", target, ALIASES_FILE_EXTENSION));
@@ -184,7 +181,7 @@ pub fn remove(config_path: &PathBuf, to_remove: Vec<String>) -> CmdResult<()> {
             remove_file(&filepath)?;
         } else {
             get_and_create_file(&filepath, false)?
-                .write_all(aliases.join(" ").as_bytes())
+                .write_all(aliases.into_iter().collect::<Vec<_>>().join(" ").as_bytes())
                 .with_cmd_err(
                     20,
                     format!("Unable to write into file '{}'", filepath.to_string_lossy()).leak(),
@@ -194,22 +191,22 @@ pub fn remove(config_path: &PathBuf, to_remove: Vec<String>) -> CmdResult<()> {
     Ok(())
 }
 
-pub fn list(config_path: &PathBuf, target: &Option<String>) -> CmdResult<Vec<Aliases>> {
-    let mut res = Vec::new();
+pub fn list(config_path: &PathBuf, target: &Option<String>) -> CmdResult<AliasesCollection> {
+    let mut res = HashMap::new();
     if let Some(target) = target {
         let target = target_from_alias(config_path, target)?.unwrap_or(target.clone());
         let aliases = list_for_target(config_path, &target)?;
-        res.push(Aliases::new(target.to_string(), aliases));
+        res.insert(target.to_string(), aliases);
     } else {
         for file in read_and_create_dir(&config_path.join("alias"))?.iter() {
             if let Some(ext) = file.extension() {
                 if ext == ALIASES_FILE_EXTENSION {
                     if let Some(stem) = file.file_stem() {
                         if let Some(aliases_target) = stem.to_str() {
-                            res.push(Aliases::new(
+                            res.insert(
                                 aliases_target.to_string(),
                                 list_for_target(&config_path, aliases_target)?,
-                            ));
+                            );
                         }
                     }
                 }

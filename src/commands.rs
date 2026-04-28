@@ -1,6 +1,10 @@
 use std::process::Command;
 
-use crate::alias::alias::AliasCommands;
+use crate::{
+    alias::{alias::AliasCommands, list, model::AliasesCollectionExt},
+    config::config_folder_path,
+    model::{CmdResult, ResultExt},
+};
 use clap::Subcommand;
 
 use crate::model::{CmdError, Exec};
@@ -18,20 +22,36 @@ pub enum BaseCommands {
 }
 
 impl Exec for BaseCommands {
-    fn exec(self) -> Result<(), CmdError> {
+    fn exec(self) -> CmdResult<()> {
         match self {
             BaseCommands::External(args) => {
+                // START : alias replacement logic
+
+                let aliases = list(&config_folder_path()?, &None)?;
+                let mut args = args;
+                for i in 1..args.len() {
+                    let arg = &args[i];
+                    if !arg.starts_with('-')
+                        && let Some(target) = aliases.search_target(arg)?
+                    {
+                        println!("REPLACED: {} -> {}", arg, target);
+                        args[i] = target;
+                    }
+                }
+
+                // END : alias replacement logic
+
                 let status = Command::new("flatpak")
                     .args(args)
                     .status()
-                    .expect("Failed to execute flatpak");
+                    .with_cmd_err(1, "Failed to execute flatpak")?;
 
                 let code = status.code().unwrap_or(1);
                 if code != 0 {
-                    return Err(CmdError {
+                    return Err(CmdError::new(
                         code,
-                        message: "Could not execute flatpak : ensure flatpak binaries are accessible via your PATH",
-                    });
+                        "Could not execute flatpak : ensure flatpak binaries are accessible via your PATH",
+                    ));
                 }
                 Ok(())
             }

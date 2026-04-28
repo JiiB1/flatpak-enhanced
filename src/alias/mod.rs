@@ -1,4 +1,6 @@
 mod functions;
-mod model;
 
 pub mod alias;
+pub mod model;
+
+pub use functions::list;

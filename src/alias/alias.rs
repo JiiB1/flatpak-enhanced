@@ -45,19 +45,16 @@ impl Exec for AliasCommands {
                 aliases,
                 force,
             } => {
-                create(&config_path, &target, aliases, force)?;
+                create(&config_path, &target, aliases.into_iter().collect(), force)?;
             }
             AliasCommands::Remove { aliases } => {
                 remove(&config_path, aliases)?;
             }
             AliasCommands::List { target } => {
                 let all_aliases = list(&config_path, &target)?;
-                all_aliases.iter().for_each(|aliases| {
-                    println!("{}", aliases.target);
-                    aliases
-                        .aliases
-                        .iter()
-                        .for_each(|alias| println!("\t{}", alias));
+                all_aliases.iter().for_each(|(target, aliases)| {
+                    println!("{}", target);
+                    aliases.iter().for_each(|alias| println!("\t{}", alias));
                 });
             }
         };

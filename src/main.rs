@@ -14,8 +14,8 @@ struct Cli {
 }
 
 fn main() {
-    let res = Cli::parse().command.exec();
-    if let Err(err) = res {
+    let cli = Cli::parse();
+    if let Err(err) = cli.command.exec() {
         eprintln!("error: {}", err.message);
         std::process::exit(err.code);
     }
