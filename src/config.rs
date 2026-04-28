@@ -5,11 +5,7 @@ use std::{
     path::PathBuf,
 };
 
-use crate::model::{CmdError, CmdResult};
-
-pub fn print_error(message: &str) {
-    eprintln!("error: {}", message)
-}
+use crate::model::{CmdError, CmdResult, ResultExt};
 
 pub fn config_folder_path() -> CmdResult<PathBuf> {
     let env_var_path = env::var("FLATPAK_EHANCED_CONFIG_FOLDER_PATH");
@@ -20,34 +16,33 @@ pub fn config_folder_path() -> CmdResult<PathBuf> {
     if home_dir.is_some() {
         return Ok(home_dir.unwrap().join(".flatpak-enhanced"));
     }
-    Err(CmdError {
-        code: 1,
-        message: "Could not find your home directory. Consider seting the FLATPAK_EHANCED_CONFIG_FOLDER_PATH environement variable.",
-    })
+    Err(CmdError::new(
+        1,
+        "Could not find your home directory. Consider seting the FLATPAK_EHANCED_CONFIG_FOLDER_PATH environement variable.",
+    ))
 }
 
 pub fn path_exists(path: &PathBuf) -> CmdResult<bool> {
-    exists(&path).map_err(|_| CmdError {
-        code: 2,
-        message: format!("Unable to read path '{}'", path.to_string_lossy()).leak(),
-    })
+    exists(&path).with_cmd_err(
+        2,
+        format!("Unable to read path '{}'", path.to_string_lossy()).leak(),
+    )
 }
 
-pub fn read_or_create_dir(path: &PathBuf) -> CmdResult<Vec<PathBuf>> {
+pub fn read_and_create_dir(path: &PathBuf) -> CmdResult<Vec<PathBuf>> {
     if !path_exists(path)? {
         return create_dir_all(path)
-            .map_err(|_| CmdError {
-                code: 3,
-                message: format!("Unable to create a directory '{}'", path.to_string_lossy())
-                    .leak(),
-            })
+            .with_cmd_err(
+                3,
+                format!("Unable to create a directory '{}'", path.to_string_lossy()).leak(),
+            )
             .map(|_| Vec::new());
     }
     read_dir(path)
-        .map_err(|_| CmdError {
-            code: 4,
-            message: format!("Unable to list the directory '{}'", path.to_string_lossy()).leak(),
-        })
+        .with_cmd_err(
+            4,
+            format!("Unable to list the directory '{}'", path.to_string_lossy()).leak(),
+        )
         .map(|content| {
             content
                 .filter_map(|entry| entry.ok().map(|e| e.path()))
@@ -55,14 +50,22 @@ pub fn read_or_create_dir(path: &PathBuf) -> CmdResult<Vec<PathBuf>> {
         })
 }
 
-pub fn get_and_create_file(path: &PathBuf) -> CmdResult<File> {
+pub fn get_and_create_file(path: &PathBuf, append: bool) -> CmdResult<File> {
     OpenOptions::new()
         .write(true)
-        .append(true)
+        .append(append)
+        .truncate(!append)
         .create(true)
         .open(path)
-        .map_err(|_| CmdError {
-            code: 5,
-            message: format!("Unable to create file '{}'", path.to_string_lossy()).leak(),
-        })
+        .with_cmd_err(
+            5,
+            format!("Unable to create file '{}'", path.to_string_lossy()).leak(),
+        )
+}
+
+pub fn remove_file(path: &PathBuf) -> CmdResult<()> {
+    std::fs::remove_file(path).with_cmd_err(
+        6,
+        format!("Unable to remove file '{}'", path.to_string_lossy()).leak(),
+    )
 }

@@ -1,7 +1,7 @@
 use clap::Subcommand;
 
 use crate::{
-    alias::functions::{create_aliases, list},
+    alias::functions::{create, list, remove},
     config::config_folder_path,
     model::{CmdError, Exec},
 };
@@ -45,10 +45,10 @@ impl Exec for AliasCommands {
                 aliases,
                 force,
             } => {
-                create_aliases(&config_path, &target, aliases, force)?;
+                create(&config_path, &target, aliases, force)?;
             }
             AliasCommands::Remove { aliases } => {
-                // TODO
+                remove(&config_path, aliases)?;
             }
             AliasCommands::List { target } => {
                 let all_aliases = list(&config_path, &target)?;
