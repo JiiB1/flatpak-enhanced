@@ -1,7 +1,7 @@
 use clap::Subcommand;
 
 use crate::{
-    alias::functions::list,
+    alias::functions::{create_aliases, list},
     config::config_folder_path,
     model::{CmdError, Exec},
 };
@@ -12,6 +12,13 @@ pub enum AliasCommands {
         about = "Create alias(es) for an application or a runtime. Existing one will be skipped."
     )]
     Create {
+        #[arg(
+            long,
+            short = 'f',
+            default_value_t = false,
+            help = "If specified, it will not be checked if <TARGET> is an installed application or runtime"
+        )]
+        force: bool,
         #[arg(help = "The application or runtime to create alias(es) for")]
         target: String,
         #[arg(help = "All the aliases to create")]
@@ -30,17 +37,21 @@ pub enum AliasCommands {
 }
 
 impl Exec for AliasCommands {
-    fn exec(&self) -> Result<(), CmdError> {
+    fn exec(self) -> Result<(), CmdError> {
         let config_path = config_folder_path()?;
         match self {
-            AliasCommands::Create { target, aliases } => {
-                // TODO
+            AliasCommands::Create {
+                target,
+                aliases,
+                force,
+            } => {
+                create_aliases(&config_path, &target, aliases, force)?;
             }
             AliasCommands::Remove { aliases } => {
                 // TODO
             }
             AliasCommands::List { target } => {
-                let all_aliases = list(&config_path, target)?;
+                let all_aliases = list(&config_path, &target)?;
                 all_aliases.iter().for_each(|aliases| {
                     println!("{}", aliases.target);
                     aliases

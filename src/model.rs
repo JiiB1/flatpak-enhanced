@@ -6,5 +6,5 @@ pub struct CmdError {
 pub type CmdResult<T> = Result<T, CmdError>;
 
 pub trait Exec {
-    fn exec(&self) -> CmdResult<()>;
+    fn exec(self) -> CmdResult<()>;
 }

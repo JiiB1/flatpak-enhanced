@@ -6,4 +6,6 @@ authors = ["JiiB <jiibbottou@gmail.com>"]
 
 [dependencies]
 clap = { version = "4.6.1", features = ["derive"] }
+dialoguer = "0.12.0"
 home = "0.5.12"
+regex = "1.12.3"

@@ -18,7 +18,7 @@ pub enum BaseCommands {
 }
 
 impl Exec for BaseCommands {
-    fn exec(&self) -> Result<(), CmdError> {
+    fn exec(self) -> Result<(), CmdError> {
         match self {
             BaseCommands::External(args) => {
                 let status = Command::new("flatpak")
