@@ -10,7 +10,8 @@ A lightweight wrapper for the flatpak tool, made with Rust.
 
 ### Planned features :
 
-- Aliases for packages
+- Aliases for packages (WIP)
+- Debug mode (tracing)
 
 ### How to use
 
