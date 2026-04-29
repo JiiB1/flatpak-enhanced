@@ -14,7 +14,9 @@ makedepends=(
   cargo
 )
 source=("git+$url.git?signed#tag=v$pkgver")
-b2sums=()
+md5sum=(
+    '887c49e6282dd579d0fe22366b9af47d'
+)
 validpgpkeys=(
   927C6C7589E345D30D71367B483D974BE8CD1C27 # JiiB <jiibbottou@gmail.com>
 )
@@ -39,3 +41,4 @@ package() {
     install -Dm0755 -t "$pkgdir/usr/bin/" "target/release/$pkgname"
     install -Dm644 LICENSE "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
 }
+md5sums=('887c49e6282dd579d0fe22366b9af47d')
