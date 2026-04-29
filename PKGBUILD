@@ -10,9 +10,10 @@ depends=(
   flatpak
 )
 makedepends=(
+  git
   cargo
 )
-source=("git+https://$url.git?signed#tag=v$pkgver")
+source=("git+$url.git?signed#tag=v$pkgver")
 b2sums=()
 validpgpkeys=(
   927C6C7589E345D30D71367B483D974BE8CD1C27 # JiiB <jiibbottou@gmail.com>
