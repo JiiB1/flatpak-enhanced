@@ -14,12 +14,15 @@ A lightweight wrapper for the `flatpak` tool adding some usefull features.
 
 - On any Arch distro
   1. This package should be available via the **AUR**
-  2. Run `pamac install flatpak-enhanced`
+  2. Run `yay -S flatpak-enhanced`
 
 - Localy
   1. Clone this repo with `git clone https://github.com/JiiB1/flatpak-enhanced.git`
   2. Run `cargo --release --locked --all-features`
   3. You can find the executable in `./target/release/flatpak-enhanced`
+
+> [!NOTE]
+> You may want to create an alias : `$ alias fpe="flatpak-enhanced"`
 
 ### Aliases management - `flatpak-enhanced alias`
 
