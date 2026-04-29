@@ -1,6 +1,11 @@
 use clap::Parser;
-use flatpak_enhanced::{commands::BaseCommands, model::Exec};
+use flatpak_enhanced::{base_commands::BaseCommands, model::Exec};
 
+/// The base of the cli tool
+///
+/// # Fields
+///
+/// * `command` - The command to execute
 #[derive(Parser)]
 #[command(
     name = "flatpak-enhanced",

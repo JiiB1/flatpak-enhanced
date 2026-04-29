@@ -1,6 +1,6 @@
 # Maintainer: JiiB <jiibbottou@gmail.com>
 pkgname=flatpak-enhanced
-pkgver=0.0.1
+pkgver=0.1.0
 pkgrel=1
 pkgdesc="A lightweight wrapper for the flatpak tool. Main feature : aliases for applications and runtimes."
 url="https://github.com/JiiB1/flatpak-enhanced"
@@ -12,16 +12,15 @@ depends=(
 makedepends=(
   cargo
 )
-_tag=1234567890123456789012345678901234567890 # git rev-parse "<tag>"
-source=("git+https://$url.git?signed#tag=$_tag")
-b2sums=('<calculatesum>')
+source=("git+https://$url.git?signed#tag=v$pkgver")
+b2sums=()
 validpgpkeys=(
   927C6C7589E345D30D71367B483D974BE8CD1C27 # JiiB <jiibbottou@gmail.com>
 )
 
 prepare() {
     export RUSTUP_TOOLCHAIN=stable
-    cargo fetch --locked --target host-tuple
+    cargo fetch --locked
 }
 
 build() {

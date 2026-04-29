@@ -1,4 +1,4 @@
 pub mod alias;
-pub mod commands;
-pub mod config;
+pub mod base_commands;
+pub mod files_management;
 pub mod model;
