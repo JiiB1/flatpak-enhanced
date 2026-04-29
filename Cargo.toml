@@ -2,5 +2,11 @@
 name = "flatpak-enhanced"
 version = "0.1.0"
 edition = "2024"
+authors = ["JiiB <jiibbottou@gmail.com>"]
 
 [dependencies]
+chrono = "0.4.44"
+clap = { version = "4.6.1", features = ["derive"] }
+dialoguer = "0.12.0"
+home = "0.5.12"
+regex = "1.12.3"
