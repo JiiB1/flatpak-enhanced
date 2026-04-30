@@ -1,52 +1,37 @@
-# flatpak-enhanced [![CodeQL](https://github.com/JiiB1/flatpak-enhanced/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/JiiB1/flatpak-enhanced/actions/workflows/github-code-scanning/codeql) [![Tests](https://github.com/JiiB1/flatpak-enhanced/actions/workflows/rust.yml/badge.svg)](https://github.com/JiiB1/flatpak-enhanced/actions/workflows/rust.yml)
+# flatpak-enhanced
+
+[![flatpak-enhanced](https://img.shields.io/aur/version/flatpak-enhanced?color=1793d1&label=flatpak-enhanced&logo=arch-linux&style=for-the-badge)](https://aur.archlinux.org/packages/flatpak-enhanced/) 
+[![CodeQL](https://github.com/JiiB1/flatpak-enhanced/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/JiiB1/flatpak-enhanced/actions/workflows/github-code-scanning/codeql)
 
 A lightweight wrapper for the `flatpak` tool adding some usefull features.
 
 ## Current features :
 
-- Aliases management
+- **Simple run** : Use `$ flatpak-enhanced <APP>` instead of `$ flatpak run <APP>`
+- **Application aliases** : Use `obs` instead of `com.obsproject.Studio`
 
 ## Planned features :
 
+- Performances improvement with cache for frequently used aliases (`V0.2.1`, **WIP**)
 - (None : **feel free to request !**)
 
-## How to use
+## Installation
 
 - On any Arch distro
   1. This package should be available via the **AUR**
-  2. Run `pamac install flatpak-enhanced`
+  2. Run `yay -S flatpak-enhanced`
 
 - Localy
   1. Clone this repo with `git clone https://github.com/JiiB1/flatpak-enhanced.git`
   2. Run `cargo --release --locked --all-features`
   3. You can find the executable in `./target/release/flatpak-enhanced`
 
-### Aliases management - `flatpak-enhanced alias`
+> [!NOTE]
+> You may want to create an alias : `$ alias fpe="flatpak-enhanced"`
 
-This feature allow you to manage aliases. These will be replaced in any `flatpak` base-command.
+## Documentation and changelogs
 
-#### Examples:
-
-- Creation - `flatpak-enhanced alias create <TARGET> [ALIASES]... ` 
-```shell
-$ flatpak-enhanced alias create org.mozilla.firefox firefox
-```
-```shell
-$ flatpak-enhanced alias create firefox cool_browser fox-enjoyer-browser
-```
-
-- Listing - `flatpak-enhanced alias list [TARGET]`
-```shell
-$ flatpak-enhanced alias list
-```
-```shell
-$ flatpak-enhanced alias list firefox
-```
-
-- Removal - `flatpak-enhanced alias remove [ALIASES]... ` 
-```shell
-$ flatpak-enhanced alias remove browser cool_browser fox-enjoyer-browser
-```
+Please, read the wiki [here](wiki).
 
 ---
 
