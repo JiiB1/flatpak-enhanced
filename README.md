@@ -1,4 +1,7 @@
-# flatpak-enhanced [![CodeQL](https://github.com/JiiB1/flatpak-enhanced/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/JiiB1/flatpak-enhanced/actions/workflows/github-code-scanning/codeql) [![Tests](https://github.com/JiiB1/flatpak-enhanced/actions/workflows/rust.yml/badge.svg)](https://github.com/JiiB1/flatpak-enhanced/actions/workflows/rust.yml)
+# flatpak-enhanced
+
+[![flatpak-enhanced](https://img.shields.io/aur/version/flatpak-enhanced?color=1793d1&label=flatpak-enhanced&logo=arch-linux&style=for-the-badge)](https://aur.archlinux.org/packages/flatpak-enhanced/) 
+[![CodeQL](https://github.com/JiiB1/flatpak-enhanced/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/JiiB1/flatpak-enhanced/actions/workflows/github-code-scanning/codeql)
 
 A lightweight wrapper for the `flatpak` tool adding some usefull features.
 
