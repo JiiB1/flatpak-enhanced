@@ -13,6 +13,7 @@ A lightweight wrapper for the `flatpak` tool adding some usefull features.
 ## Planned features :
 
 - Performances improvement with cache for frequently used aliases (`V0.2.1`, **WIP**)
+- Add support for user or custom insstalled application (`V0.2.1`)
 - (None : **feel free to request !**)
 
 ## Installation
