@@ -1,46 +1,36 @@
+use clap::Subcommand;
 use std::process::Command;
 
 use crate::{
-    alias::{alias::AliasCommands, list, model::AliasesCollectionExt, potential_alias},
-    files_management::config_folder_path,
-    model::{Result, ResultExt},
+    alias::list,
+    model::{Error, Exec, Result, ResultExt},
 };
-use clap::Subcommand;
-
-use crate::model::{Error, Exec};
 
 /// All base commands
-///
-/// # See Also
-///
-/// - [`Cli`] for usage
 #[derive(Subcommand)]
 pub enum BaseCommands {
     /// Undefined commands (passed to `flatpak`)
     #[command(external_subcommand)]
     External(Vec<String>),
-
-    /// Access to the aliases management
-    #[command(about = "A set of command to manage applications and packages aliases")]
-    Alias {
-        #[command(subcommand)]
-        action: AliasCommands,
-    },
 }
 
 impl Exec for BaseCommands {
-    fn exec(self) -> Result<()> {
+    fn exec(self, debug: bool) -> Result<()> {
         match self {
             BaseCommands::External(mut args) => {
-                let has_potential_aliases = args.iter().skip(1).any(|arg| potential_alias(arg));
-                if has_potential_aliases {
-                    let aliases = list(&config_folder_path()?, &None)?;
-                    let alias_index = aliases.build_alias_index();
-                    for i in 1..args.len() {
-                        let arg = &args[i];
-                        if potential_alias(arg) {
-                            if let Some(target) = alias_index.get(arg) {
-                                args[i] = target.clone();
+                if !args.is_empty() {
+                    let mut aliases = list(debug)?;
+                    if args.len() == 1 {
+                        // If a single alias : '$ flatpak run <APP>'
+                        if let Some(target) = aliases.remove(&args[0]) {
+                            args[0] = target;
+                            args.insert(0, "run".to_string());
+                        }
+                    } else {
+                        // Replace all found aliases
+                        for i in 1..args.len() {
+                            if let Some(target) = aliases.remove(&args[i]) {
+                                args[i] = target;
                             }
                         }
                     }
@@ -60,7 +50,6 @@ impl Exec for BaseCommands {
                 }
                 Ok(())
             }
-            BaseCommands::Alias { action } => action.exec(),
         }
     }
 }
