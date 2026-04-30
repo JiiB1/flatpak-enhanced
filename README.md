@@ -31,7 +31,7 @@ A lightweight wrapper for the `flatpak` tool adding some usefull features.
 
 ## Documentation and changelogs
 
-Please, read the wiki [here](wiki).
+Please, read the wiki [here](https://github.com/JiiB1/flatpak-enhanced/wiki).
 
 ---
 
