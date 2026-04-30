@@ -14,14 +14,17 @@ use flatpak_enhanced::{base_commands::BaseCommands, model::Exec};
     long_about = None
 )]
 struct Cli {
+    #[arg(long = "debug-fpe")]
+    debug: bool,
+
     #[command(subcommand)]
     command: BaseCommands,
 }
 
 fn main() {
     let cli = Cli::parse();
-    if let Err(err) = cli.command.exec() {
-        eprintln!("error: {}", err.message);
+    if let Err(err) = cli.command.exec(cli.debug) {
+        eprintln!("fatal-error: {}", err.message);
         std::process::exit(err.code);
     }
 }

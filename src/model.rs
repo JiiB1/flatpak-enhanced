@@ -33,5 +33,5 @@ impl<T, E> ResultExt<T> for std::result::Result<T, E> {
 /// A trait for command than can be executed and can fail
 pub trait Exec {
     /// Execute the command and return the eventual error
-    fn exec(self) -> Result<()>;
+    fn exec(self, debug: bool) -> Result<()>;
 }
